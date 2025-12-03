@@ -250,10 +250,11 @@ useTitle('World Clock')
 
 <style scoped>
 .app-container {
-  min-height: 100vh;
+  height: 100vh; /* Change min-height to height to constrain layout */
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
+  overflow: hidden; /* Prevent body scroll */
 }
 
 .app-header {
@@ -328,11 +329,16 @@ useTitle('World Clock')
   flex: 1;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .cities-list {
   position: relative;
   z-index: 5; /* Ensure rows are above the background overlay */
+  overflow-y: auto;
+  flex: 1;
+  width: 100%;
 }
 
 .indicator-line {
