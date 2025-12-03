@@ -193,7 +193,6 @@ useTitle('World Clock')
           :city="city"
           :viewingTime="viewingTime"
           :isCurrentLocation="index === 0 && city.name === 'Local Time'"
-          draggable="true"
           @dragstart="onDragStart(index)"
           @dragover.prevent="onDragOver(index)"
           @dragend="onDragEnd"
@@ -305,7 +304,7 @@ useTitle('World Clock')
 
 .cities-list {
   position: relative;
-  z-index: 1;
+  z-index: 5; /* Ensure rows are above the background overlay */
 }
 
 .indicator-line {
@@ -315,7 +314,7 @@ useTitle('World Clock')
   bottom: 0;
   width: 2px;
   background-color: var(--color-indicator);
-  z-index: 5;
+  z-index: 15; /* Higher than cities-list (5) to be visible */
   pointer-events: none;
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
 }
@@ -342,11 +341,9 @@ useTitle('World Clock')
   bottom: 0;
   right: 0;
   left: var(--sidebar-width);
-  z-index: 10; /* Above rows but below modal */
+  z-index: 1; /* Below cities-list so buttons work, but handles background drag */
   cursor: grab;
-  opacity: 0; /* Invisible */
 }
-
 .interaction-overlay:active {
   cursor: grabbing;
 }

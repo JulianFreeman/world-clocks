@@ -102,11 +102,21 @@ onMounted(() => {
   }
 })
 
+const isDragEnabled = ref(false)
 </script>
 
 <template>
-  <div class="city-row">
-    <div class="drag-handle" title="Drag to reorder">
+  <div 
+    class="city-row"
+    :draggable="isDragEnabled"
+    @dragend="isDragEnabled = false"
+  >
+    <div 
+      class="drag-handle" 
+      title="Drag to reorder"
+      @mousedown="isDragEnabled = true"
+      @mouseup="isDragEnabled = false"
+    >
       <GripVertical :size="16" />
     </div>
     
@@ -126,6 +136,7 @@ onMounted(() => {
       class="timeline-wrapper" 
       ref="timelineContainer"
       @mousedown="$emit('start-drag', $event)"
+      @dragstart.prevent
     >
        <div 
          class="timeline-track"
@@ -244,7 +255,10 @@ onMounted(() => {
   position: relative;
   overflow: hidden;
   background: var(--color-timeline-bg);
-  cursor: ew-resize; /* Indicate horizontal scrolling */
+  cursor: grab; /* Consistent with global drag */
+}
+.timeline-wrapper:active {
+  cursor: grabbing;
 }
 
 .timeline-track {
