@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useStorage, useNow, useTitle } from '@vueuse/core'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useStorage, useNow, useTitle, useResizeObserver } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { Plus, RotateCcw } from 'lucide-vue-next'
 import { v4 as uuidv4 } from 'uuid'
@@ -57,6 +57,31 @@ const isDraggingTime = ref(false)
 const isResizingSidebar = ref(false)
 const lastMouseX = ref(0)
 const pixelsPerHour = 120 // Must match Child component
+
+const citiesListRef = ref<HTMLElement | null>(null)
+const citiesListClientWidth = ref(0)
+
+useResizeObserver(citiesListRef, (entries) => {
+  const entry = entries[0]
+  // Use contentRect.width usually, but verify element exists for clientWidth to be safe against box-sizing issues
+  // clientWidth is robust for 'excluding scrollbar'
+  if (citiesListRef.value) {
+    citiesListClientWidth.value = citiesListRef.value.clientWidth
+  } else if (entry) {
+    citiesListClientWidth.value = entry.contentRect.width
+  }
+})
+
+// Calculate indicator line position dynamically to account for scrollbars
+// Formula: Sidebar + (TimelineWidth / 2)
+// TimelineWidth = TotalClientWidth - SidebarWidth - RemoveBtnWidth (40px)
+// Result: SidebarWidth + (TotalClientWidth - SidebarWidth - 40) / 2 
+//       = (TotalClientWidth + SidebarWidth - 40) / 2
+const indicatorLeft = computed(() => {
+  if (!citiesListClientWidth.value) return 0
+  const removeBtnWidth = 40
+  return (citiesListClientWidth.value + sidebarWidth.value - removeBtnWidth) / 2
+})
 
 // --- Sidebar Resize Logic ---
 
@@ -184,9 +209,12 @@ useTitle('World Clock')
 
     <main class="timeline-area">
       <!-- The Red Line Indicator -->
-      <div class="indicator-line"></div>
+      <div 
+        class="indicator-line"
+        :style="{ left: `${indicatorLeft}px` }"
+      ></div>
       
-      <div class="cities-list">
+      <div class="cities-list" ref="citiesListRef">
         <TimelineRow
           v-for="(city, index) in selectedCities"
           :key="city.id"
@@ -309,7 +337,7 @@ useTitle('World Clock')
 
 .indicator-line {
   position: absolute;
-  left: calc(var(--sidebar-width) + (100% - var(--sidebar-width)) / 2);
+  /* left is handled by inline style */
   top: 0;
   bottom: 0;
   width: 2px;
