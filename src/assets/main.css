@@ -1,0 +1,58 @@
+:root {
+  --color-bg: #ffffff;
+  --color-text: #1a1a1a;
+  --color-border: #e5e7eb;
+  --color-primary: #3b82f6;
+  --color-timeline-bg: #f3f4f6;
+  --color-timeline-line: #d1d5db;
+  --color-timeline-text: #6b7280;
+  --color-indicator: #ef4444;
+  --color-hover: #f9fafb;
+}
+
+html.dark {
+  --color-bg: #1a1a1a;
+  --color-text: #ffffff;
+  --color-border: #374151;
+  --color-primary: #60a5fa;
+  --color-timeline-bg: #262626;
+  --color-timeline-line: #4b5563;
+  --color-timeline-text: #9ca3af;
+  --color-indicator: #f87171;
+  --color-hover: #2d2d2d;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s, color 0.3s;
+  overflow: hidden; /* Prevent body scroll, we handle it in app */
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-timeline-text);
+}

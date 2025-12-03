@@ -1,0 +1,286 @@
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useStorage, useNow, useTitle } from '@vueuse/core'
+import dayjs from 'dayjs'
+import { Plus, RotateCcw } from 'lucide-vue-next'
+import { v4 as uuidv4 } from 'uuid'
+
+import CitySelector from './components/CitySelector.vue'
+import TimelineRow from './components/TimelineRow.vue'
+import ThemeToggle from './components/ThemeToggle.vue'
+import type { CityData } from './data/cities'
+
+// --- State ---
+
+// Viewing Time (Center of Screen)
+const now = useNow({ interval: 1000 })
+// Initialize with current time. We don't auto-sync to 'now' unless user clicks "Back to Now"
+// or if we are in "live" mode. Let's default to static mode that initializes at 'now', 
+// but stays still unless dragged? 
+// Actually, a clock should tick.
+// So `viewingTime` should be an offset from `Date.now()`?
+// Or simply: `viewingTime` is a ref. We update it every second if 'isLive' is true.
+// Dragging sets 'isLive' to false.
+const isLive = ref(true)
+const viewingTime = ref(dayjs())
+
+// Update viewing time if live
+const timer = setInterval(() => {
+  if (isLive.value) {
+    viewingTime.value = dayjs()
+  }
+}, 1000)
+
+onUnmounted(() => clearInterval(timer))
+
+function resetToNow() {
+  isLive.value = true
+  viewingTime.value = dayjs()
+}
+
+// Cities Persistence
+interface StoredCity extends CityData {
+  id: string
+}
+
+// Default cities
+const defaultCities: StoredCity[] = [
+  { id: uuidv4(), name: 'Local Time', country: 'Current Location', timezone: dayjs.tz.guess() }
+]
+
+const selectedCities = useStorage<StoredCity[]>('world-clock-cities', defaultCities)
+
+// UI State
+const showAddCity = ref(false)
+const isDraggingTime = ref(false)
+const lastMouseX = ref(0)
+const pixelsPerHour = 120 // Must match Child component
+
+// --- Time Dragging Logic ---
+
+function onTimelineMouseDown(e: MouseEvent) {
+  // Only trigger if clicked on timeline track (right side)
+  // We can check target or class, or just rely on the event bubbling from the specific area
+  // But since we handle it globally for sync, let's rely on a wrapper event or pass-through
+  isDraggingTime.value = true
+  isLive.value = false // Stop auto-ticking
+  lastMouseX.value = e.clientX
+  document.body.style.cursor = 'grabbing'
+  window.addEventListener('mousemove', onTimelineDrag)
+  window.addEventListener('mouseup', onTimelineDragEnd)
+}
+
+function onTimelineDrag(e: MouseEvent) {
+  if (!isDraggingTime.value) return
+  
+  const deltaX = e.clientX - lastMouseX.value
+  lastMouseX.value = e.clientX
+  
+  // Convert pixels to minutes
+  // pixelsPerHour = 120 => 2px = 1 min
+  const deltaHours = deltaX / pixelsPerHour
+  
+  viewingTime.value = viewingTime.value.subtract(deltaHours, 'hour')
+}
+
+function onTimelineDragEnd() {
+  isDraggingTime.value = false
+  document.body.style.cursor = ''
+  window.removeEventListener('mousemove', onTimelineDrag)
+  window.removeEventListener('mouseup', onTimelineDragEnd)
+}
+
+// --- City Management ---
+
+function handleAddCity(city: CityData) {
+  selectedCities.value.push({
+    ...city,
+    id: uuidv4()
+  })
+  showAddCity.value = false
+}
+
+function removeCity(index: number) {
+  selectedCities.value.splice(index, 1)
+}
+
+// --- Row Reordering (Drag and Drop) ---
+
+const draggedItemIndex = ref<number | null>(null)
+
+function onDragStart(index: number) {
+  draggedItemIndex.value = index
+}
+
+function onDragOver(index: number) {
+  if (draggedItemIndex.value === null || draggedItemIndex.value === index) return
+  
+  // Move item
+  const item = selectedCities.value[draggedItemIndex.value]
+  if (!item) return
+  
+  selectedCities.value.splice(draggedItemIndex.value, 1)
+  selectedCities.value.splice(index, 0, item)
+  draggedItemIndex.value = index
+}
+
+function onDragEnd() {
+  draggedItemIndex.value = null
+}
+
+useTitle('World Clock')
+</script>
+
+<template>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <h1>World Clock</h1>
+      </div>
+      <div class="controls">
+        <button 
+          class="action-btn" 
+          @click="resetToNow"
+          :class="{ active: isLive }"
+          title="Back to Now"
+        >
+          <RotateCcw :size="18" />
+          <span class="btn-text">Now</span>
+        </button>
+        <button class="action-btn primary" @click="showAddCity = true">
+          <Plus :size="18" />
+          <span class="btn-text">Add City</span>
+        </button>
+        <ThemeToggle />
+      </div>
+    </header>
+
+    <main class="timeline-area">
+      <!-- The Red Line Indicator -->
+      <div class="indicator-line"></div>
+      
+      <div class="cities-list">
+        <TimelineRow
+          v-for="(city, index) in selectedCities"
+          :key="city.id"
+          :city="city"
+          :viewingTime="viewingTime"
+          :isCurrentLocation="index === 0 && city.name === 'Local Time'"
+          draggable="true"
+          @dragstart="onDragStart(index)"
+          @dragover.prevent="onDragOver(index)"
+          @dragend="onDragEnd"
+          @remove="removeCity(index)"
+          @start-drag="onTimelineMouseDown"
+        />
+      </div>
+    </main>
+
+    <CitySelector 
+      v-if="showAddCity" 
+      @close="showAddCity = false"
+      @add="handleAddCity"
+    />
+  </div>
+</template>
+
+<style scoped>
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  z-index: 10;
+}
+
+.logo h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(to right, var(--color-primary), #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background-color: var(--color-hover);
+  border-color: var(--color-timeline-line);
+}
+
+.action-btn.active {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.action-btn.primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.action-btn.primary:hover {
+  opacity: 0.9;
+}
+
+.btn-text {
+  display: none;
+}
+@media (min-width: 600px) {
+  .btn-text {
+    display: inline;
+  }
+}
+
+.timeline-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.cities-list {
+  position: relative;
+  z-index: 1;
+}
+
+.indicator-line {
+  position: absolute;
+  /* Sidebar width = 40px (drag) + 220px (info) = 260px */
+  left: calc(260px + (100% - 260px) / 2);
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--color-indicator);
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+</style>
