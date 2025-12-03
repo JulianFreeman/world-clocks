@@ -272,6 +272,7 @@ useTitle('World Clock')
   font-weight: 600;
   margin: 0;
   background: linear-gradient(to right, var(--color-primary), #8b5cf6);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
