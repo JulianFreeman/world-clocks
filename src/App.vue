@@ -269,7 +269,7 @@ useTitle('World Clock')
 
 .logo h1 {
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 600;
   margin: 0;
   background: linear-gradient(to right, var(--color-primary), #8b5cf6);
   -webkit-background-clip: text;
