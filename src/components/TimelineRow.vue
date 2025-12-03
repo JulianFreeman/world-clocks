@@ -29,6 +29,7 @@ watch(() => props.viewingTime, (newTime) => {
 })
 
 // Generate ticks for +/- 2 days around anchor
+// Optimization: Pre-calculate all display properties to avoid function calls in template during drag
 const ticks = computed(() => {
   const result = []
   const start = anchorTime.value.subtract(2, 'day')
@@ -36,7 +37,16 @@ const ticks = computed(() => {
   
   let current = start.startOf('hour')
   while (current.isBefore(end)) {
-    result.push(current)
+    const localTick = current.tz(props.city.timezone)
+    const diff = current.diff(anchorTime.value, 'hour', true)
+    
+    result.push({
+      key: current.toISOString(),
+      left: `${diff * pixelsPerHour}px`,
+      label: localTick.format('H'),
+      isMidnight: localTick.hour() === 0,
+      dayLabel: localTick.format('MMM D')
+    })
     current = current.add(1, 'hour')
   }
   return result
@@ -67,28 +77,6 @@ const timelineTransform = computed(() => {
   
   return -1 * (diffHours * pixelsPerHour) + (containerWidth.value / 2)
 })
-
-// Tick positioning relative to anchor
-function getTickStyle(tick: dayjs.Dayjs) {
-  const diff = tick.diff(anchorTime.value, 'hour', true)
-  const left = diff * pixelsPerHour
-  return {
-    left: `${left}px`
-  }
-}
-
-// Format tick label (local to city)
-function formatTick(tick: dayjs.Dayjs) {
-  return tick.tz(props.city.timezone).format('H')
-}
-
-function isMidnight(tick: dayjs.Dayjs) {
-  return tick.tz(props.city.timezone).hour() === 0
-}
-
-function getDayLabel(tick: dayjs.Dayjs) {
-    return tick.tz(props.city.timezone).format('MMM D')
-}
 
 // Resize observer
 onMounted(() => {
@@ -145,13 +133,13 @@ const isDragEnabled = ref(false)
          <!-- Render Grid/Ticks -->
          <div 
             v-for="tick in ticks" 
-            :key="tick.toISOString()"
+            :key="tick.key"
             class="tick"
-            :class="{ 'tick-midnight': isMidnight(tick) }"
-            :style="getTickStyle(tick)"
+            :class="{ 'tick-midnight': tick.isMidnight }"
+            :style="{ left: tick.left }"
          >
-            <span class="tick-label">{{ formatTick(tick) }}</span>
-            <span v-if="isMidnight(tick)" class="day-label">{{ getDayLabel(tick) }}</span>
+            <span class="tick-label">{{ tick.label }}</span>
+            <span v-if="tick.isMidnight" class="day-label">{{ tick.dayLabel }}</span>
             <div class="tick-mark"></div>
          </div>
        </div>
