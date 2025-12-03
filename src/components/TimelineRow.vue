@@ -191,13 +191,14 @@ onMounted(() => {
 }
 
 .city-info {
-  width: 220px;
+  width: calc(var(--sidebar-width, 260px) - 40px);
   padding: 16px;
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .city-name-group {
@@ -205,16 +206,23 @@ onMounted(() => {
   align-items: baseline;
   gap: 8px;
   margin-bottom: 4px;
+  overflow: hidden;
 }
 
 .city-name {
   font-size: 1.1rem;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .city-details {
   font-size: 0.85rem;
   color: var(--color-timeline-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .city-meta {

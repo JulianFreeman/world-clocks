@@ -49,12 +49,39 @@ const defaultCities: StoredCity[] = [
 ]
 
 const selectedCities = useStorage<StoredCity[]>('world-clock-cities', defaultCities)
+const sidebarWidth = useStorage('world-clock-sidebar-width', 260)
 
 // UI State
 const showAddCity = ref(false)
 const isDraggingTime = ref(false)
+const isResizingSidebar = ref(false)
 const lastMouseX = ref(0)
 const pixelsPerHour = 120 // Must match Child component
+
+// --- Sidebar Resize Logic ---
+
+function onResizeMouseDown(e: MouseEvent) {
+  isResizingSidebar.value = true
+  document.body.style.cursor = 'col-resize'
+  window.addEventListener('mousemove', onResizeMove)
+  window.addEventListener('mouseup', onResizeEnd)
+}
+
+function onResizeMove(e: MouseEvent) {
+  if (!isResizingSidebar.value) return
+  const newWidth = e.clientX
+  // Constrain width (min 200, max 600)
+  if (newWidth >= 200 && newWidth <= 600) {
+    sidebarWidth.value = newWidth
+  }
+}
+
+function onResizeEnd() {
+  isResizingSidebar.value = false
+  document.body.style.cursor = ''
+  window.removeEventListener('mousemove', onResizeMove)
+  window.removeEventListener('mouseup', onResizeEnd)
+}
 
 // --- Time Dragging Logic ---
 
@@ -132,7 +159,7 @@ useTitle('World Clock')
 </script>
 
 <template>
-  <div class="app-container">
+  <div class="app-container" :style="{ '--sidebar-width': `${sidebarWidth}px` }">
     <header class="app-header">
       <div class="logo">
         <h1>World Clock</h1>
@@ -174,6 +201,16 @@ useTitle('World Clock')
           @start-drag="onTimelineMouseDown"
         />
       </div>
+      
+      <div 
+        class="resize-handle"
+        @mousedown.prevent="onResizeMouseDown"
+      ></div>
+
+      <div 
+        class="interaction-overlay"
+        @mousedown="onTimelineMouseDown"
+      ></div>
     </main>
 
     <CitySelector 
@@ -273,8 +310,7 @@ useTitle('World Clock')
 
 .indicator-line {
   position: absolute;
-  /* Sidebar width = 40px (drag) + 220px (info) = 260px */
-  left: calc(260px + (100% - 260px) / 2);
+  left: calc(var(--sidebar-width) + (100% - var(--sidebar-width)) / 2);
   top: 0;
   bottom: 0;
   width: 2px;
@@ -282,5 +318,36 @@ useTitle('World Clock')
   z-index: 5;
   pointer-events: none;
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--sidebar-width);
+  width: 4px;
+  cursor: col-resize;
+  z-index: 20;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  margin-left: -2px; /* Center on the border */
+}
+.resize-handle:hover, .resize-handle:active {
+  background-color: var(--color-primary);
+}
+
+.interaction-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: var(--sidebar-width);
+  z-index: 10; /* Above rows but below modal */
+  cursor: grab;
+  opacity: 0; /* Invisible */
+}
+
+.interaction-overlay:active {
+  cursor: grabbing;
 }
 </style>
