@@ -178,7 +178,11 @@ function removeCity(index: number) {
 const draggedItemIndex = ref<number | null>(null)
 
 function onDragStart(index: number) {
-  draggedItemIndex.value = index
+  // Delay slightly so the browser captures the element snapshot (drag image) 
+  // before we make the original element in the DOM invisible/transparent.
+  setTimeout(() => {
+    draggedItemIndex.value = index
+  }, 0)
 }
 
 function onDragOver(index: number) {
@@ -226,10 +230,24 @@ useTitle('World Clock')
       <div class="now-line" v-show="isNowLineVisible" :style="{ left: `${nowLineLeft}px`, height: `${citiesListHeight}px` }"></div>
 
       <div class="cities-list" ref="citiesListRef">
-        <TimelineRow v-for="(city, index) in selectedCities" :key="city.id" :city="city" :viewingTime="viewingTime"
-          :isCurrentLocation="city.name === 'Local Time'" @dragstart="onDragStart(index)"
-          @dragover.prevent="onDragOver(index)" @dragend="onDragEnd" @remove="removeCity(index)"
-          @start-drag="onTimelineMouseDown" />
+        <TransitionGroup 
+          tag="div" 
+          name="list" 
+        >
+          <TimelineRow 
+            v-for="(city, index) in selectedCities" 
+            :key="city.id" 
+            :city="city" 
+            :viewingTime="viewingTime"
+            :isCurrentLocation="city.name === 'Local Time'" 
+            :class="{ 'is-dragging-original': index === draggedItemIndex }"
+            @dragstart="onDragStart(index)"
+            @dragover.prevent="onDragOver(index)" 
+            @dragend="onDragEnd" 
+            @remove="removeCity(index)"
+            @start-drag="onTimelineMouseDown" 
+          />
+        </TransitionGroup>
       </div>
 
       <div class="resize-handle" @mousedown.prevent="onResizeMouseDown"></div>
@@ -395,5 +413,26 @@ useTitle('World Clock')
 
 .interaction-overlay:active {
   cursor: grabbing;
+}
+
+/* List Transitions for Smooth Sorting */
+.list-move {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+  /* IMPORTANT: Disable pointer events while animating to prevent 
+     rapid-fire dragover events that cause jittering/infinite loops */
+  pointer-events: none;
+}
+
+/* 
+  When dragging, we want the 'original' item in the list to be invisible 
+  so it looks like a 'hole' is moving around. 
+  Opacity 0.01 is used instead of visibility:hidden to keep layout space.
+  We use background: transparent to ensure no borders linger visually.
+*/
+.is-dragging-original {
+  opacity: 0.01;
+  background: transparent; 
+  box-shadow: none;
+  pointer-events: none;
 }
 </style>
