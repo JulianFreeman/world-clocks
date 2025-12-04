@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useStorage, useNow, useTitle, useResizeObserver } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { Plus, RotateCcw } from 'lucide-vue-next'
@@ -25,17 +25,15 @@ const isLive = ref(true)
 const viewingTime = ref(dayjs())
 
 // Update viewing time if live
-const timer = setInterval(() => {
+watch(now, (newNow: Date) => {
   if (isLive.value) {
-    viewingTime.value = dayjs()
+    viewingTime.value = dayjs(newNow)
   }
-}, 1000)
-
-onUnmounted(() => clearInterval(timer))
+})
 
 function resetToNow() {
   isLive.value = true
-  viewingTime.value = dayjs()
+  viewingTime.value = dayjs(now.value)
 }
 
 // Cities Persistence
@@ -87,6 +85,9 @@ const indicatorLeft = computed(() => {
 })
 
 const nowLineLeft = computed(() => {
+  // Perfect alignment when live
+  if (isLive.value) return indicatorLeft.value
+  
   const nowTime = dayjs(now.value)
   const diffHours = nowTime.diff(viewingTime.value, 'hour', true)
   return indicatorLeft.value + (diffHours * pixelsPerHour)
@@ -368,16 +369,18 @@ useTitle('World Clock')
   z-index: 15; /* Higher than cities-list (5) to be visible */
   pointer-events: none;
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  transform: translateX(-50%);
 }
 
 .now-line {
   position: absolute;
   top: 0;
-  width: 1px;
+  width: 0;
   border-left: 2px dashed #eab308; /* Yellow-500 */
   z-index: 14; /* Slightly below red indicator */
   pointer-events: none;
   opacity: 0.7;
+  transform: translateX(-50%);
 }
 
 .now-label {
