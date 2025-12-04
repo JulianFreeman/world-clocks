@@ -2,9 +2,11 @@
 import { ref, computed } from 'vue'
 import { X, Plus, Search } from 'lucide-vue-next'
 import { availableCities, type CityData } from '../data/cities'
+import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
 
 const emit = defineEmits(['add', 'close'])
+const { t } = useI18n()
 
 const searchQuery = ref('')
 
@@ -29,7 +31,7 @@ function addCity(city: CityData) {
   <div class="modal-overlay" @click="$emit('close')">
     <div class="modal-content" @click.stop>
       <header class="modal-header">
-        <h2>Add City</h2>
+        <h2>{{ t('city.modalTitle') }}</h2>
         <button @click="$emit('close')" class="close-btn">
           <X :size="20" />
         </button>
@@ -40,7 +42,7 @@ function addCity(city: CityData) {
         <input 
           v-model="searchQuery" 
           type="text" 
-          placeholder="Search city or country..." 
+          :placeholder="t('city.searchPlaceholder')" 
           autofocus
         />
       </div>
@@ -60,7 +62,7 @@ function addCity(city: CityData) {
           <Plus :size="16" class="plus-icon" />
         </button>
         <div v-if="filteredCities.length === 0" class="no-results">
-          No cities found.
+          {{ t('city.noResults') }}
         </div>
       </div>
     </div>

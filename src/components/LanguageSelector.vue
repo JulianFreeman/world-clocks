@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useColorMode, onClickOutside } from '@vueuse/core'
-import { Moon, Sun, Monitor, ChevronDown } from 'lucide-vue-next'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Languages, ChevronDown, Check } from 'lucide-vue-next'
+import { onClickOutside } from '@vueuse/core'
+import dayjs from 'dayjs'
 
-const { t } = useI18n()
-
-const mode = useColorMode({
-  emitAuto: true,
-})
-
+const { locale, t } = useI18n()
 const isOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 
@@ -17,50 +13,41 @@ onClickOutside(dropdownRef, () => {
   isOpen.value = false
 })
 
-function setMode(newMode: 'auto' | 'light' | 'dark') {
-  mode.value = newMode
+const languages = [
+  { code: 'en', label: 'English' },
+  { code: 'zh-CN', label: '简体中文' }
+]
+
+function setLanguage(code: string) {
+  locale.value = code
   isOpen.value = false
+  // Update dayjs locale globally
+  dayjs.locale(code === 'zh-CN' ? 'zh-cn' : 'en')
 }
 </script>
 
 <template>
-  <div class="theme-dropdown-container" ref="dropdownRef">
+  <div class="lang-dropdown-container" ref="dropdownRef">
     <button 
-      class="theme-btn"
+      class="lang-btn"
       @click="isOpen = !isOpen"
-      :title="t('app.theme.title')"
+      :title="t('app.language.title')"
     >
-      <Moon v-if="mode === 'dark'" :size="18" />
-      <Sun v-else-if="mode === 'light'" :size="18" />
-      <Monitor v-else :size="18" />
+      <Languages :size="18" />
       <ChevronDown :size="14" class="chevron" :class="{ open: isOpen }" />
     </button>
 
     <Transition name="fade">
       <div v-if="isOpen" class="dropdown-menu">
         <button 
+          v-for="lang in languages"
+          :key="lang.code"
           class="menu-item" 
-          :class="{ active: mode === 'auto' }"
-          @click="setMode('auto')"
+          :class="{ active: locale === lang.code }"
+          @click="setLanguage(lang.code)"
         >
-          <Monitor :size="16" />
-          <span>{{ t('app.theme.auto') }}</span>
-        </button>
-        <button 
-          class="menu-item" 
-          :class="{ active: mode === 'light' }"
-          @click="setMode('light')"
-        >
-          <Sun :size="16" />
-          <span>{{ t('app.theme.light') }}</span>
-        </button>
-        <button 
-          class="menu-item" 
-          :class="{ active: mode === 'dark' }"
-          @click="setMode('dark')"
-        >
-          <Moon :size="16" />
-          <span>{{ t('app.theme.dark') }}</span>
+          <span>{{ lang.label }}</span>
+          <Check v-if="locale === lang.code" :size="14" class="check-icon" />
         </button>
       </div>
     </Transition>
@@ -68,11 +55,11 @@ function setMode(newMode: 'auto' | 'light' | 'dark') {
 </template>
 
 <style scoped>
-.theme-dropdown-container {
+.lang-dropdown-container {
   position: relative;
 }
 
-.theme-btn {
+.lang-btn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -85,7 +72,7 @@ function setMode(newMode: 'auto' | 'light' | 'dark') {
   transition: all 0.2s;
 }
 
-.theme-btn:hover {
+.lang-btn:hover {
   background-color: var(--color-hover);
   border-color: var(--color-timeline-line);
 }
@@ -117,7 +104,7 @@ function setMode(newMode: 'auto' | 'light' | 'dark') {
 .menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   padding: 8px 12px;
   width: 100%;
   border: none;
@@ -136,6 +123,10 @@ function setMode(newMode: 'auto' | 'light' | 'dark') {
   color: var(--color-primary);
   background-color: rgba(59, 130, 246, 0.1);
   font-weight: 500;
+}
+
+.check-icon {
+  color: var(--color-primary);
 }
 
 /* Transition */

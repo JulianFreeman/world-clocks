@@ -3,6 +3,7 @@ import { computed, ref, onMounted, watch } from 'vue'
 import dayjs from 'dayjs'
 import { GripVertical, Trash2 } from 'lucide-vue-next'
 import type { CityData } from '../data/cities'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   city: CityData
@@ -11,6 +12,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['remove', 'update:viewingTime', 'start-drag'])
+const { t, locale } = useI18n()
 
 const pixelsPerHour = 120
 const timelineContainer = ref<HTMLElement | null>(null)
@@ -31,6 +33,9 @@ watch(() => props.viewingTime, (newTime) => {
 // Generate ticks for +/- 2 days around anchor
 // Optimization: Pre-calculate all display properties to avoid function calls in template during drag
 const ticks = computed(() => {
+  // Dependency on locale to trigger re-render when language changes
+  const _l = locale.value
+  
   const result = []
   const start = anchorTime.value.subtract(2, 'day')
   const end = anchorTime.value.add(2, 'day')
@@ -45,7 +50,8 @@ const ticks = computed(() => {
       left: `${diff * pixelsPerHour}px`,
       label: localTick.format('H'),
       isMidnight: localTick.hour() === 0,
-      dayLabel: localTick.format('MMM D')
+      // Ensure locale is applied
+      dayLabel: localTick.locale(_l).format('MMM D')
     })
     current = current.add(1, 'hour')
   }
@@ -57,9 +63,24 @@ const localTime = computed(() => {
   return props.viewingTime.tz(props.city.timezone)
 })
 
-const formattedTime = computed(() => localTime.value.format('HH:mm'))
-const formattedDate = computed(() => localTime.value.format('ddd, MMM D'))
+// Reactive formatting based on locale
+const formattedTime = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _l = locale.value 
+  return localTime.value.format('HH:mm')
+})
+const formattedDate = computed(() => {
+  return localTime.value.locale(locale.value).format('ddd, MMM D')
+})
 const gmtOffset = computed(() => localTime.value.format('Z'))
+
+// Localized Names
+const cityName = computed(() => {
+  return props.isCurrentLocation ? t('city.localTime') : props.city.name
+})
+const cityCountry = computed(() => {
+  return props.isCurrentLocation ? t('city.currentLocation') : props.city.country
+})
 
 // Calculate timeline offset
 // We want the point on timeline corresponding to 'viewingTime' to be at center of container
@@ -67,14 +88,6 @@ const timelineTransform = computed(() => {
   if (!containerWidth.value) return 0
   
   const diffHours = props.viewingTime.diff(anchorTime.value, 'hour', true)
-  // The anchor is at 0px relative to the inner strip start? 
-  // Let's say inner strip starts at -48h relative to anchor.
-  // Actually simpler:
-  // Let 0px of inner strip be `anchorTime`.
-  // We want `viewingTime` to be at `containerWidth / 2`.
-  // `viewingTime` position relative to anchor is `diffHours * pixelsPerHour`.
-  // So we shift left by that amount, then shift right by half container.
-  
   return -1 * (diffHours * pixelsPerHour) + (containerWidth.value / 2)
 })
 
@@ -101,7 +114,7 @@ const isDragEnabled = ref(false)
   >
     <div 
       class="drag-handle" 
-      title="Drag to reorder"
+      :title="t('city.drag')"
       @mousedown="isDragEnabled = true"
       @mouseup="isDragEnabled = false"
     >
@@ -110,8 +123,8 @@ const isDragEnabled = ref(false)
     
     <div class="city-info">
       <div class="city-name-group">
-        <span class="city-name">{{ city.name }}</span>
-        <span class="city-details">{{ city.country }}</span>
+        <span class="city-name">{{ cityName }}</span>
+        <span class="city-details">{{ cityCountry }}</span>
       </div>
       <div class="city-meta">
         <span class="time-preview">{{ formattedTime }}</span>
@@ -143,21 +156,13 @@ const isDragEnabled = ref(false)
             <div class="tick-mark"></div>
          </div>
        </div>
-       
-       <!-- Current Time Indicator (Intersection) -->
-       <!-- We don't strictly need it here if the parent draws a global line, 
-            but the prompt says 'At the intersection point... display date and time'. 
-            We are displaying it in the left panel for clarity, 
-            but we could also display it floating on the line. 
-            Let's stick to the left panel for clean design, or maybe a tooltip.
-       -->
     </div>
     
     <button 
       v-if="!isCurrentLocation" 
       class="remove-btn" 
       @click="$emit('remove')"
-      title="Remove city"
+      :title="t('city.remove')"
     >
       <Trash2 :size="18" />
     </button>

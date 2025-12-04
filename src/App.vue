@@ -8,7 +8,11 @@ import { v4 as uuidv4 } from 'uuid'
 import CitySelector from './components/CitySelector.vue'
 import TimelineRow from './components/TimelineRow.vue'
 import ThemeToggle from './components/ThemeToggle.vue'
+import LanguageSelector from './components/LanguageSelector.vue'
 import type { CityData } from './data/cities'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // --- State ---
 
@@ -47,7 +51,7 @@ const defaultCities: StoredCity[] = [
 ]
 
 const selectedCities = useStorage<StoredCity[]>('world-clock-cities', defaultCities)
-const sidebarWidth = useStorage('world-clock-sidebar-width', 300)
+const sidebarWidth = useStorage('world-clock-sidebar-width', 260)
 
 // UI State
 const showAddCity = ref(false)
@@ -201,24 +205,26 @@ function onDragEnd() {
   draggedItemIndex.value = null
 }
 
-useTitle('World Clock')
+const appTitle = computed(() => t('app.title'))
+useTitle(appTitle)
 </script>
 
 <template>
   <div class="app-container" :style="{ '--sidebar-width': `${sidebarWidth}px` }">
     <header class="app-header">
       <div class="logo">
-        <h1>World Clock</h1>
+        <h1>{{ t('app.title') }}</h1>
       </div>
       <div class="controls">
-        <button class="action-btn" @click="resetToNow" :class="{ active: isLive }" title="Back to Now">
+        <button class="action-btn" @click="resetToNow" :class="{ active: isLive }" :title="t('app.backToNow')">
           <RotateCcw :size="18" />
-          <span class="btn-text">Now</span>
+          <span class="btn-text">{{ t('app.now') }}</span>
         </button>
         <button class="action-btn primary" @click="showAddCity = true">
           <Plus :size="18" />
-          <span class="btn-text">Add City</span>
+          <span class="btn-text">{{ t('app.addCity') }}</span>
         </button>
+        <LanguageSelector />
         <ThemeToggle />
       </div>
     </header>
