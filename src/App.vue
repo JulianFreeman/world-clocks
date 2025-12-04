@@ -47,7 +47,7 @@ const defaultCities: StoredCity[] = [
 ]
 
 const selectedCities = useStorage<StoredCity[]>('world-clock-cities', defaultCities)
-const sidebarWidth = useStorage('world-clock-sidebar-width', 260)
+const sidebarWidth = useStorage('world-clock-sidebar-width', 300)
 
 // UI State
 const showAddCity = ref(false)
