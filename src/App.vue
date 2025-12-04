@@ -58,6 +58,7 @@ const pixelsPerHour = 120 // Must match Child component
 const ROW_HEIGHT = 100 // Must match CSS .city-row height
 
 const citiesListRef = ref<HTMLElement | null>(null)
+const timelineAreaRef = ref<HTMLElement | null>(null) // Ref for the main timeline area
 const citiesListClientWidth = ref(0)
 // Dynamic height based on number of rows
 const citiesListHeight = computed(() => selectedCities.value.length * ROW_HEIGHT)
@@ -87,10 +88,17 @@ const indicatorLeft = computed(() => {
 const nowLineLeft = computed(() => {
   // Perfect alignment when live
   if (isLive.value) return indicatorLeft.value
-  
+
   const nowTime = dayjs(now.value)
   const diffHours = nowTime.diff(viewingTime.value, 'hour', true)
   return indicatorLeft.value + (diffHours * pixelsPerHour)
+})
+
+// Calculate fixed position for the NOW label (relative to viewport)
+const nowLabelFixedLeft = computed(() => {
+  if (!timelineAreaRef.value) return 0
+  const timelineAreaRect = timelineAreaRef.value.getBoundingClientRect()
+  return timelineAreaRect.left + nowLineLeft.value
 })
 
 // --- Sidebar Resize Logic ---
@@ -134,14 +142,14 @@ function onTimelineMouseDown(e: MouseEvent) {
 
 function onTimelineDrag(e: MouseEvent) {
   if (!isDraggingTime.value) return
-  
+
   const deltaX = e.clientX - lastMouseX.value
   lastMouseX.value = e.clientX
-  
+
   // Convert pixels to minutes
   // pixelsPerHour = 120 => 2px = 1 min
   const deltaHours = deltaX / pixelsPerHour
-  
+
   viewingTime.value = viewingTime.value.subtract(deltaHours, 'hour')
 }
 
@@ -176,11 +184,11 @@ function onDragStart(index: number) {
 
 function onDragOver(index: number) {
   if (draggedItemIndex.value === null || draggedItemIndex.value === index) return
-  
+
   // Move item
   const item = selectedCities.value[draggedItemIndex.value]
   if (!item) return
-  
+
   selectedCities.value.splice(draggedItemIndex.value, 1)
   selectedCities.value.splice(index, 0, item)
   draggedItemIndex.value = index
@@ -200,12 +208,7 @@ useTitle('World Clock')
         <h1>World Clock</h1>
       </div>
       <div class="controls">
-        <button 
-          class="action-btn" 
-          @click="resetToNow"
-          :class="{ active: isLive }"
-          title="Back to Now"
-        >
+        <button class="action-btn" @click="resetToNow" :class="{ active: isLive }" title="Back to Now">
           <RotateCcw :size="18" />
           <span class="btn-text">Now</span>
         </button>
@@ -217,62 +220,41 @@ useTitle('World Clock')
       </div>
     </header>
 
-    <main class="timeline-area">
+    <main class="timeline-area" ref="timelineAreaRef">
       <!-- The Red Line Indicator -->
-            <div 
-              class="indicator-line"
-              :style="{ left: `${indicatorLeft}px`, height: `${citiesListHeight}px` }"
-            ></div>
-            
-            <!-- The Real-time "Now" Line -->
-            <div 
-              class="now-line"
-              :style="{ left: `${nowLineLeft}px`, height: `${citiesListHeight}px` }"
-            >
-              <div class="now-label">NOW</div>
-            </div>
-            
-            <div class="cities-list" ref="citiesListRef">
-              <TimelineRow
-                v-for="(city, index) in selectedCities"
-                :key="city.id"
-                :city="city"
-                :viewingTime="viewingTime"
-                :isCurrentLocation="city.name === 'Local Time'"
-                @dragstart="onDragStart(index)"
-                @dragover.prevent="onDragOver(index)"
-                @dragend="onDragEnd"
-                @remove="removeCity(index)"
-                @start-drag="onTimelineMouseDown"
-              />
-            </div>
-            
-            <div 
-              class="resize-handle"
-              @mousedown.prevent="onResizeMouseDown"
-              :style="{ height: `${citiesListHeight}px` }"
-            ></div>
-      <div 
-        class="interaction-overlay"
-        @mousedown="onTimelineMouseDown"
-      ></div>
+      <div class="indicator-line" :style="{ left: `${indicatorLeft}px`, height: `${citiesListHeight}px` }"></div>
+
+      <!-- The Real-time "Now" Line -->
+      <div class="now-line" :style="{ left: `${nowLineLeft}px`, height: `${citiesListHeight}px` }">
+      </div>
+      <!-- "NOW" label, positioned above the timeline -->
+      <div class="now-label-wrapper" :style="{ left: `${nowLabelFixedLeft}px`, top: `40px` }">
+        <div class="now-label">NOW</div>
+      </div>
+      <div class="cities-list" ref="citiesListRef">
+        <TimelineRow v-for="(city, index) in selectedCities" :key="city.id" :city="city" :viewingTime="viewingTime"
+          :isCurrentLocation="city.name === 'Local Time'" @dragstart="onDragStart(index)"
+          @dragover.prevent="onDragOver(index)" @dragend="onDragEnd" @remove="removeCity(index)"
+          @start-drag="onTimelineMouseDown" />
+      </div>
+
+      <div class="resize-handle" @mousedown.prevent="onResizeMouseDown"></div>
+      <div class="interaction-overlay" @mousedown="onTimelineMouseDown"></div>
     </main>
 
-    <CitySelector 
-      v-if="showAddCity" 
-      @close="showAddCity = false"
-      @add="handleAddCity"
-    />
+    <CitySelector v-if="showAddCity" @close="showAddCity = false" @add="handleAddCity" />
   </div>
 </template>
 
 <style scoped>
 .app-container {
-  height: 100vh; /* Change min-height to height to constrain layout */
+  height: 100vh;
+  /* Change min-height to height to constrain layout */
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
-  overflow: hidden; /* Prevent body scroll */
+  overflow: hidden;
+  /* Prevent body scroll */
 }
 
 .app-header {
@@ -338,6 +320,7 @@ useTitle('World Clock')
 .btn-text {
   display: none;
 }
+
 @media (min-width: 600px) {
   .btn-text {
     display: inline;
@@ -354,7 +337,8 @@ useTitle('World Clock')
 
 .cities-list {
   position: relative;
-  z-index: 5; /* Ensure rows are above the background overlay */
+  z-index: 5;
+  /* Ensure rows are above the background overlay */
   overflow-y: auto;
   flex: 1;
   width: 100%;
@@ -366,7 +350,8 @@ useTitle('World Clock')
   top: 0;
   width: 2px;
   background-color: var(--color-indicator);
-  z-index: 15; /* Higher than cities-list (5) to be visible */
+  z-index: 15;
+  /* Higher than cities-list (5) to be visible */
   pointer-events: none;
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
   transform: translateX(-50%);
@@ -376,37 +361,53 @@ useTitle('World Clock')
   position: absolute;
   top: 0;
   width: 0;
-  border-left: 2px dashed #eab308; /* Yellow-500 */
-  z-index: 14; /* Slightly below red indicator */
+  border-left: 2px dashed #eab308;
+  /* Yellow-500 */
+  z-index: 14;
+  /* Slightly below red indicator */
   pointer-events: none;
   opacity: 0.7;
   transform: translateX(-50%);
 }
 
+.now-label-wrapper {
+  position: fixed;
+  /* Position fixed relative to viewport */
+  z-index: 100;
+  /* Ensure it's on top */
+  pointer-events: none;
+  transform: translateX(-50%);
+  /* Center the wrapper relative to its left position */
+}
+
 .now-label {
-  position: absolute;
-  top: 0;
-  left: 4px;
   background-color: #eab308;
   color: black;
   font-size: 10px;
   font-weight: bold;
   padding: 2px 4px;
-  border-radius: 0 0 4px 0;
+  border-radius: 4px;
+  /* Make it fully rounded, no specific corners */
+  white-space: nowrap;
+  /* Prevent "NOW" from wrapping */
 }
 
 .resize-handle {
   position: absolute;
   top: 0;
+  bottom: 0;
   left: var(--sidebar-width);
   width: 4px;
   cursor: col-resize;
   z-index: 20;
   background-color: transparent;
   transition: background-color 0.2s;
-  margin-left: -2px; /* Center on the border */
+  margin-left: -2px;
+  /* Center on the border */
 }
-.resize-handle:hover, .resize-handle:active {
+
+.resize-handle:hover,
+.resize-handle:active {
   background-color: var(--color-primary);
 }
 
@@ -416,9 +417,11 @@ useTitle('World Clock')
   bottom: 0;
   right: 0;
   left: var(--sidebar-width);
-  z-index: 1; /* Below cities-list so buttons work, but handles background drag */
+  z-index: 1;
+  /* Below cities-list so buttons work, but handles background drag */
   cursor: grab;
 }
+
 .interaction-overlay:active {
   cursor: grabbing;
 }
