@@ -76,10 +76,11 @@ function addCity(city: CityData) {
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 100;
   backdrop-filter: blur(2px);
+  padding-top: 10vh;
 }
 
 .modal-content {
