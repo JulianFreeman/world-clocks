@@ -57,9 +57,12 @@ const isDraggingTime = ref(false)
 const isResizingSidebar = ref(false)
 const lastMouseX = ref(0)
 const pixelsPerHour = 120 // Must match Child component
+const ROW_HEIGHT = 100 // Must match CSS .city-row height
 
 const citiesListRef = ref<HTMLElement | null>(null)
 const citiesListClientWidth = ref(0)
+// Dynamic height based on number of rows
+const citiesListHeight = computed(() => selectedCities.value.length * ROW_HEIGHT)
 
 useResizeObserver(citiesListRef, (entries) => {
   const entry = entries[0]
@@ -215,39 +218,39 @@ useTitle('World Clock')
 
     <main class="timeline-area">
       <!-- The Red Line Indicator -->
-      <div 
-        class="indicator-line"
-        :style="{ left: `${indicatorLeft}px` }"
-      ></div>
-
-      <!-- The Real-time "Now" Line -->
-      <div 
-        class="now-line"
-        :style="{ left: `${nowLineLeft}px` }"
-      >
-        <div class="now-label">NOW</div>
-      </div>
-      
-      <div class="cities-list" ref="citiesListRef">
-        <TimelineRow
-          v-for="(city, index) in selectedCities"
-          :key="city.id"
-          :city="city"
-          :viewingTime="viewingTime"
-          :isCurrentLocation="city.name === 'Local Time'"
-          @dragstart="onDragStart(index)"
-          @dragover.prevent="onDragOver(index)"
-          @dragend="onDragEnd"
-          @remove="removeCity(index)"
-          @start-drag="onTimelineMouseDown"
-        />
-      </div>
-      
-      <div 
-        class="resize-handle"
-        @mousedown.prevent="onResizeMouseDown"
-      ></div>
-
+            <div 
+              class="indicator-line"
+              :style="{ left: `${indicatorLeft}px`, height: `${citiesListHeight}px` }"
+            ></div>
+            
+            <!-- The Real-time "Now" Line -->
+            <div 
+              class="now-line"
+              :style="{ left: `${nowLineLeft}px`, height: `${citiesListHeight}px` }"
+            >
+              <div class="now-label">NOW</div>
+            </div>
+            
+            <div class="cities-list" ref="citiesListRef">
+              <TimelineRow
+                v-for="(city, index) in selectedCities"
+                :key="city.id"
+                :city="city"
+                :viewingTime="viewingTime"
+                :isCurrentLocation="city.name === 'Local Time'"
+                @dragstart="onDragStart(index)"
+                @dragover.prevent="onDragOver(index)"
+                @dragend="onDragEnd"
+                @remove="removeCity(index)"
+                @start-drag="onTimelineMouseDown"
+              />
+            </div>
+            
+            <div 
+              class="resize-handle"
+              @mousedown.prevent="onResizeMouseDown"
+              :style="{ height: `${citiesListHeight}px` }"
+            ></div>
       <div 
         class="interaction-overlay"
         @mousedown="onTimelineMouseDown"
@@ -360,7 +363,6 @@ useTitle('World Clock')
   position: absolute;
   /* left is handled by inline style */
   top: 0;
-  bottom: 0;
   width: 2px;
   background-color: var(--color-indicator);
   z-index: 15; /* Higher than cities-list (5) to be visible */
@@ -371,7 +373,6 @@ useTitle('World Clock')
 .now-line {
   position: absolute;
   top: 0;
-  bottom: 0;
   width: 1px;
   border-left: 2px dashed #eab308; /* Yellow-500 */
   z-index: 14; /* Slightly below red indicator */
@@ -394,7 +395,6 @@ useTitle('World Clock')
 .resize-handle {
   position: absolute;
   top: 0;
-  bottom: 0;
   left: var(--sidebar-width);
   width: 4px;
   cursor: col-resize;
