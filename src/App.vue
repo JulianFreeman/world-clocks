@@ -83,6 +83,12 @@ const indicatorLeft = computed(() => {
   return (citiesListClientWidth.value + sidebarWidth.value - removeBtnWidth) / 2
 })
 
+const nowLineLeft = computed(() => {
+  const nowTime = dayjs(now.value)
+  const diffHours = nowTime.diff(viewingTime.value, 'hour', true)
+  return indicatorLeft.value + (diffHours * pixelsPerHour)
+})
+
 // --- Sidebar Resize Logic ---
 
 function onResizeMouseDown(e: MouseEvent) {
@@ -213,6 +219,14 @@ useTitle('World Clock')
         class="indicator-line"
         :style="{ left: `${indicatorLeft}px` }"
       ></div>
+
+      <!-- The Real-time "Now" Line -->
+      <div 
+        class="now-line"
+        :style="{ left: `${nowLineLeft}px` }"
+      >
+        <div class="now-label">NOW</div>
+      </div>
       
       <div class="cities-list" ref="citiesListRef">
         <TimelineRow
@@ -352,6 +366,29 @@ useTitle('World Clock')
   z-index: 15; /* Higher than cities-list (5) to be visible */
   pointer-events: none;
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.now-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  border-left: 2px dashed #eab308; /* Yellow-500 */
+  z-index: 14; /* Slightly below red indicator */
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.now-label {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  background-color: #eab308;
+  color: black;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 0 0 4px 0;
 }
 
 .resize-handle {
