@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
 
 const emit = defineEmits(['add', 'close'])
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const searchQuery = ref('')
 
@@ -14,9 +14,19 @@ const filteredCities = computed(() => {
   const query = searchQuery.value.toLowerCase()
   return availableCities.filter(city => 
     city.name.toLowerCase().includes(query) || 
-    city.country.toLowerCase().includes(query)
+    city.country.toLowerCase().includes(query) ||
+    (city.name_zh && city.name_zh.includes(query)) ||
+    (city.country_zh && city.country_zh.includes(query))
   )
 })
+
+function getCityName(city: CityData) {
+  return locale.value === 'zh-CN' ? (city.name_zh || city.name) : city.name
+}
+
+function getCityCountry(city: CityData) {
+  return locale.value === 'zh-CN' ? (city.country_zh || city.country) : city.country
+}
 
 function formatOffset(timezone: string) {
   return dayjs().tz(timezone).format('Z')
@@ -55,8 +65,8 @@ function addCity(city: CityData) {
           @click="addCity(city)"
         >
           <span class="city-info">
-            <span class="city-name">{{ city.name }}</span>
-            <span class="city-country">{{ city.country }}</span>
+            <span class="city-name">{{ getCityName(city) }}</span>
+            <span class="city-country">{{ getCityCountry(city) }}</span>
           </span>
           <span class="city-offset">UTC {{ formatOffset(city.timezone) }}</span>
           <Plus :size="16" class="plus-icon" />

@@ -76,10 +76,12 @@ const gmtOffset = computed(() => localTime.value.format('Z'))
 
 // Localized Names
 const cityName = computed(() => {
-  return props.isCurrentLocation ? t('city.localTime') : props.city.name
+  if (props.isCurrentLocation) return t('city.localTime')
+  return locale.value === 'zh-CN' ? (props.city.name_zh || props.city.name) : props.city.name
 })
 const cityCountry = computed(() => {
-  return props.isCurrentLocation ? t('city.currentLocation') : props.city.country
+  if (props.isCurrentLocation) return t('city.currentLocation')
+  return locale.value === 'zh-CN' ? (props.city.country_zh || props.city.country) : props.city.country
 })
 
 // Calculate timeline offset
