@@ -435,4 +435,17 @@ useTitle('World Clock')
   box-shadow: none;
   pointer-events: none;
 }
+
+/* Entry and Leave Animations */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.5, 1);
+}
+
+/* Start state for entering items (and end state for leaving) */
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
 </style>
