@@ -58,7 +58,6 @@ const pixelsPerHour = 120 // Must match Child component
 const ROW_HEIGHT = 100 // Must match CSS .city-row height
 
 const citiesListRef = ref<HTMLElement | null>(null)
-const timelineAreaRef = ref<HTMLElement | null>(null) // Ref for the main timeline area
 const citiesListClientWidth = ref(0)
 // Dynamic height based on number of rows
 const citiesListHeight = computed(() => selectedCities.value.length * ROW_HEIGHT)
@@ -77,7 +76,7 @@ useResizeObserver(citiesListRef, (entries) => {
 // Calculate indicator line position dynamically to account for scrollbars
 // Formula: Sidebar + (TimelineWidth / 2)
 // TimelineWidth = TotalClientWidth - SidebarWidth - RemoveBtnWidth (40px)
-// Result: SidebarWidth + (TotalClientWidth - SidebarWidth - 40) / 2 
+// Result: SidebarWidth + (TotalClientWidth + SidebarWidth - 40) / 2 
 //       = (TotalClientWidth + SidebarWidth - 40) / 2
 const indicatorLeft = computed(() => {
   if (!citiesListClientWidth.value) return 0
@@ -93,14 +92,6 @@ const nowLineLeft = computed(() => {
   const diffHours = nowTime.diff(viewingTime.value, 'hour', true)
   return indicatorLeft.value + (diffHours * pixelsPerHour)
 })
-
-// Calculate fixed position for the NOW label (relative to viewport)
-const nowLabelFixedLeft = computed(() => {
-  if (!timelineAreaRef.value) return 0
-  const timelineAreaRect = timelineAreaRef.value.getBoundingClientRect()
-  return timelineAreaRect.left + nowLineLeft.value
-})
-
 // --- Sidebar Resize Logic ---
 
 function onResizeMouseDown(e: MouseEvent) {
@@ -220,17 +211,12 @@ useTitle('World Clock')
       </div>
     </header>
 
-    <main class="timeline-area" ref="timelineAreaRef">
+    <main class="timeline-area">
       <!-- The Red Line Indicator -->
       <div class="indicator-line" :style="{ left: `${indicatorLeft}px`, height: `${citiesListHeight}px` }"></div>
-
       <!-- The Real-time "Now" Line -->
-      <div class="now-line" :style="{ left: `${nowLineLeft}px`, height: `${citiesListHeight}px` }">
-      </div>
-      <!-- "NOW" label, positioned above the timeline -->
-      <div class="now-label-wrapper" :style="{ left: `${nowLabelFixedLeft}px`, top: `40px` }">
-        <div class="now-label">NOW</div>
-      </div>
+      <div class="now-line" :style="{ left: `${nowLineLeft}px`, height: `${citiesListHeight}px` }"></div>
+
       <div class="cities-list" ref="citiesListRef">
         <TimelineRow v-for="(city, index) in selectedCities" :key="city.id" :city="city" :viewingTime="viewingTime"
           :isCurrentLocation="city.name === 'Local Time'" @dragstart="onDragStart(index)"
@@ -370,28 +356,6 @@ useTitle('World Clock')
   transform: translateX(-50%);
 }
 
-.now-label-wrapper {
-  position: fixed;
-  /* Position fixed relative to viewport */
-  z-index: 100;
-  /* Ensure it's on top */
-  pointer-events: none;
-  transform: translateX(-50%);
-  /* Center the wrapper relative to its left position */
-}
-
-.now-label {
-  background-color: #eab308;
-  color: black;
-  font-size: 10px;
-  font-weight: bold;
-  padding: 2px 4px;
-  border-radius: 4px;
-  /* Make it fully rounded, no specific corners */
-  white-space: nowrap;
-  /* Prevent "NOW" from wrapping */
-}
-
 .resize-handle {
   position: absolute;
   top: 0;
@@ -403,7 +367,6 @@ useTitle('World Clock')
   background-color: transparent;
   transition: background-color 0.2s;
   margin-left: -2px;
-  /* Center on the border */
 }
 
 .resize-handle:hover,
