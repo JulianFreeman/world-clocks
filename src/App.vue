@@ -220,7 +220,7 @@ useTitle('World Clock')
           :key="city.id"
           :city="city"
           :viewingTime="viewingTime"
-          :isCurrentLocation="index === 0 && city.name === 'Local Time'"
+          :isCurrentLocation="city.name === 'Local Time'"
           @dragstart="onDragStart(index)"
           @dragover.prevent="onDragOver(index)"
           @dragend="onDragEnd"
