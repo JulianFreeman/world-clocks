@@ -1,31 +1,63 @@
 :root {
-  --color-bg: #ffffff;
-  --color-text: #1a1a1a;
-  --color-border: #e5e7eb;
-  --color-primary: #3b82f6;
-  --color-timeline-bg: #f3f4f6;
-  --color-timeline-line: #d1d5db;
-  --color-timeline-text: #6b7280;
-  --color-indicator: #ef4444;
-  --color-hover: #f9fafb;
+  /* Theme: The Great Wave (Light) */
+  --color-primary: #1d4ed8;
+  --color-secondary: #93c5fd;
+  --color-accent: #1e40af;
+  --color-background: #f0f9ff;
+  --color-surface: #ffffff;
+  --color-text: #0c4a6e;
+  --color-muted: #94a3b8;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+  
+  --font-heading: "Merriweather", serif;
+  --font-body: "Inter", sans-serif;
+  --radius: 0.5rem;
+  --border-width: 1px;
+
+  /* Legacy Mappings */
+  --color-bg: var(--color-background);
+  --color-border: var(--color-muted);
+  --color-timeline-bg: var(--color-surface);
+  --color-timeline-line: var(--color-muted);
+  --color-timeline-text: var(--color-muted);
+  --color-indicator: var(--color-error);
+  --color-hover: #e0f2fe;
 }
 
 html.dark {
-  --color-bg: #1a1a1a;
-  --color-text: #ffffff;
-  --color-border: #374151;
-  --color-primary: #60a5fa;
-  --color-timeline-bg: #262626;
-  --color-timeline-line: #4b5563;
-  --color-timeline-text: #9ca3af;
-  --color-indicator: #f87171;
-  --color-hover: #2d2d2d;
+  /* Theme: The Starry Night (Dark) */
+  --color-primary: #eab308;
+  --color-secondary: #1e3a8a;
+  --color-accent: #facc15;
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #f1f5f9;
+  --color-muted: #64748b;
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-error: #ef4444;
+  --color-info: #1e3a8a;
+
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Legacy Mappings */
+  --color-bg: var(--color-background);
+  --color-border: var(--color-muted);
+  --color-timeline-bg: var(--color-surface);
+  --color-timeline-line: var(--color-muted);
+  --color-timeline-text: var(--color-muted);
+  --color-indicator: var(--color-error);
+  --color-hover: var(--color-surface);
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-body);
   background-color: var(--color-bg);
   color: var(--color-text);
   transition: background-color 0.3s, color 0.3s;
@@ -55,4 +87,7 @@ button {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-timeline-text);
+}
+h1, h2, h3, h4, h5, h6, .city-name {
+  font-family: var(--font-heading);
 }
