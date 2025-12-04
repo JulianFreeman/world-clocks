@@ -92,6 +92,14 @@ const nowLineLeft = computed(() => {
   const diffHours = nowTime.diff(viewingTime.value, 'hour', true)
   return indicatorLeft.value + (diffHours * pixelsPerHour)
 })
+
+const isNowLineVisible = computed(() => {
+  if (!citiesListClientWidth.value) return false
+  const left = nowLineLeft.value
+  // Ensure the line is within the timeline track (between sidebar and remove button)
+  // 40 is the width of the remove button/placeholder on the right
+  return left > sidebarWidth.value && left < (citiesListClientWidth.value - 40)
+})
 // --- Sidebar Resize Logic ---
 
 function onResizeMouseDown(e: MouseEvent) {
@@ -215,7 +223,7 @@ useTitle('World Clock')
       <!-- The Red Line Indicator -->
       <div class="indicator-line" :style="{ left: `${indicatorLeft}px`, height: `${citiesListHeight}px` }"></div>
       <!-- The Real-time "Now" Line -->
-      <div class="now-line" :style="{ left: `${nowLineLeft}px`, height: `${citiesListHeight}px` }"></div>
+      <div class="now-line" v-show="isNowLineVisible" :style="{ left: `${nowLineLeft}px`, height: `${citiesListHeight}px` }"></div>
 
       <div class="cities-list" ref="citiesListRef">
         <TimelineRow v-for="(city, index) in selectedCities" :key="city.id" :city="city" :viewingTime="viewingTime"
