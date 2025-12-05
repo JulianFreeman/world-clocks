@@ -26,6 +26,9 @@ export const availableCities: CityData[] = [
   { name: 'Vancouver', country: 'Canada', timezone: 'America/Vancouver', name_zh: '温哥华', country_zh: '加拿大' },
   { name: 'Montreal', country: 'Canada', timezone: 'America/Toronto', name_zh: '蒙特利尔', country_zh: '加拿大' },
   { name: 'Calgary', country: 'Canada', timezone: 'America/Edmonton', name_zh: '卡尔加里', country_zh: '加拿大' },
+  { name: 'Halifax', country: 'Canada', timezone: 'America/Halifax', name_zh: '哈利法克斯', country_zh: '加拿大' },
+  { name: 'St. John\'s', country: 'Canada', timezone: 'America/St_Johns', name_zh: '圣约翰斯', country_zh: '加拿大' },
+  { name: 'Nuuk', country: 'Greenland', timezone: 'America/Nuuk', name_zh: '努克', country_zh: '格陵兰' },
   { name: 'Mexico City', country: 'Mexico', timezone: 'America/Mexico_City', name_zh: '墨西哥城', country_zh: '墨西哥' },
 
   // South America
@@ -63,6 +66,7 @@ export const availableCities: CityData[] = [
   { name: 'Budapest', country: 'Hungary', timezone: 'Europe/Budapest', name_zh: '布达佩斯', country_zh: '匈牙利' },
   { name: 'Dublin', country: 'Ireland', timezone: 'Europe/Dublin', name_zh: '都柏林', country_zh: '爱尔兰' },
   { name: 'Lisbon', country: 'Portugal', timezone: 'Europe/Lisbon', name_zh: '里斯本', country_zh: '葡萄牙' },
+  { name: 'Reykjavik', country: 'Iceland', timezone: 'Atlantic/Reykjavik', name_zh: '雷克雅未克', country_zh: '冰岛' },
   { name: 'Athens', country: 'Greece', timezone: 'Europe/Athens', name_zh: '雅典', country_zh: '希腊' },
   { name: 'Istanbul', country: 'Turkey', timezone: 'Europe/Istanbul', name_zh: '伊斯坦布尔', country_zh: '土耳其' },
   { name: 'Kyiv', country: 'Ukraine', timezone: 'Europe/Kyiv', name_zh: '基辅', country_zh: '乌克兰' },
@@ -97,6 +101,11 @@ export const availableCities: CityData[] = [
   { name: 'Karachi', country: 'Pakistan', timezone: 'Asia/Karachi', name_zh: '卡拉奇', country_zh: '巴基斯坦' },
   { name: 'Dhaka', country: 'Bangladesh', timezone: 'Asia/Dhaka', name_zh: '达卡', country_zh: '孟加拉国' },
   { name: 'Almaty', country: 'Kazakhstan', timezone: 'Asia/Almaty', name_zh: '阿拉木图', country_zh: '哈萨克斯坦' },
+  { name: 'Tashkent', country: 'Uzbekistan', timezone: 'Asia/Tashkent', name_zh: '塔什干', country_zh: '乌兹别克斯坦' },
+  { name: 'Kabul', country: 'Afghanistan', timezone: 'Asia/Kabul', name_zh: '喀布尔', country_zh: '阿富汗' },
+  { name: 'Kathmandu', country: 'Nepal', timezone: 'Asia/Kathmandu', name_zh: '加德满都', country_zh: '尼泊尔' },
+  { name: 'Yangon', country: 'Myanmar', timezone: 'Asia/Yangon', name_zh: '仰光', country_zh: '缅甸' },
+  { name: 'Vladivostok', country: 'Russia', timezone: 'Asia/Vladivostok', name_zh: '符拉迪沃斯托克', country_zh: '俄罗斯' },
   
   // Oceania
   { name: 'Sydney', country: 'Australia', timezone: 'Australia/Sydney', name_zh: '悉尼', country_zh: '澳大利亚' },
@@ -104,11 +113,16 @@ export const availableCities: CityData[] = [
   { name: 'Brisbane', country: 'Australia', timezone: 'Australia/Brisbane', name_zh: '布里斯班', country_zh: '澳大利亚' },
   { name: 'Perth', country: 'Australia', timezone: 'Australia/Perth', name_zh: '珀斯', country_zh: '澳大利亚' },
   { name: 'Adelaide', country: 'Australia', timezone: 'Australia/Adelaide', name_zh: '阿德莱德', country_zh: '澳大利亚' },
+  { name: 'Darwin', country: 'Australia', timezone: 'Australia/Darwin', name_zh: '达尔文', country_zh: '澳大利亚' },
   { name: 'Auckland', country: 'New Zealand', timezone: 'Pacific/Auckland', name_zh: '奥克兰', country_zh: '新西兰' },
   { name: 'Wellington', country: 'New Zealand', timezone: 'Pacific/Auckland', name_zh: '惠灵顿', country_zh: '新西兰' },
   { name: 'Suva', country: 'Fiji', timezone: 'Pacific/Fiji', name_zh: '苏瓦', country_zh: '斐济' },
+  { name: 'Noumea', country: 'New Caledonia', timezone: 'Pacific/Noumea', name_zh: '努美阿', country_zh: '新喀里多尼亚' },
+  { name: 'Apia', country: 'Samoa', timezone: 'Pacific/Apia', name_zh: '阿皮亚', country_zh: '萨摩亚' },
+  { name: 'Kiritimati', country: 'Kiribati', timezone: 'Pacific/Kiritimati', name_zh: '基里蒂马蒂', country_zh: '基里巴斯' },
 
   // Africa
+  { name: 'Praia', country: 'Cape Verde', timezone: 'Atlantic/Cape_Verde', name_zh: '普拉亚', country_zh: '佛得角' },
   { name: 'Cairo', country: 'Egypt', timezone: 'Africa/Cairo', name_zh: '开罗', country_zh: '埃及' },
   { name: 'Johannesburg', country: 'South Africa', timezone: 'Africa/Johannesburg', name_zh: '约翰内斯堡', country_zh: '南非' },
   { name: 'Cape Town', country: 'South Africa', timezone: 'Africa/Johannesburg', name_zh: '开普敦', country_zh: '南非' },
