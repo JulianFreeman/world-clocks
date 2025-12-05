@@ -9,15 +9,31 @@ const emit = defineEmits(['add', 'close'])
 const { t, locale } = useI18n()
 
 const searchQuery = ref('')
+const sortBy = ref<'country' | 'timezone'>('country')
 
 const filteredCities = computed(() => {
   const query = searchQuery.value.toLowerCase()
-  return availableCities.filter(city => 
+  const filtered = availableCities.filter(city => 
     city.name.toLowerCase().includes(query) || 
     city.country.toLowerCase().includes(query) ||
     (city.name_zh && city.name_zh.includes(query)) ||
     (city.country_zh && city.country_zh.includes(query))
   )
+
+  return filtered.sort((a, b) => {
+    if (sortBy.value === 'timezone') {
+      const offsetA = dayjs().tz(a.timezone).utcOffset()
+      const offsetB = dayjs().tz(b.timezone).utcOffset()
+      if (offsetA !== offsetB) {
+        return offsetA - offsetB
+      }
+    }
+    
+    if (a.country === b.country) {
+      return a.name.localeCompare(b.name)
+    }
+    return a.country.localeCompare(b.country)
+  })
 })
 
 function getCityName(city: CityData) {
@@ -47,14 +63,33 @@ function addCity(city: CityData) {
         </button>
       </header>
       
-      <div class="search-bar">
-        <Search :size="16" class="search-icon" />
-        <input 
-          v-model="searchQuery" 
-          type="text" 
-          :placeholder="t('city.searchPlaceholder')" 
-          autofocus
-        />
+      <div class="controls-row">
+        <div class="search-wrapper">
+          <Search :size="16" class="search-icon" />
+          <input 
+            v-model="searchQuery" 
+            type="text" 
+            :placeholder="t('city.searchPlaceholder')" 
+            autofocus
+          />
+        </div>
+
+        <div class="sort-buttons">
+          <button 
+            class="sort-btn" 
+            :class="{ active: sortBy === 'country' }"
+            @click="sortBy = 'country'"
+          >
+            {{ t('city.sortCountry') }}
+          </button>
+          <button 
+            class="sort-btn" 
+            :class="{ active: sortBy === 'timezone' }"
+            @click="sortBy = 'timezone'"
+          >
+            {{ t('city.sortTimezone') }}
+          </button>
+        </div>
       </div>
       
       <div class="city-list">
@@ -132,31 +167,70 @@ function addCity(city: CityData) {
   opacity: 1;
 }
 
-.search-bar {
+.controls-row {
   padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-wrapper {
   position: relative;
+  flex: 1;
   display: flex;
   align-items: center;
 }
 
 .search-icon {
   position: absolute;
-  left: 24px;
+  left: 12px;
   color: var(--color-timeline-text);
+  pointer-events: none;
 }
 
-.search-bar input {
+.search-wrapper input {
   width: 100%;
-  padding: 10px 10px 10px 36px;
+  padding: 8px 8px 8px 36px;
   border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-timeline-bg);
   color: var(--color-text);
   font-size: 1rem;
 }
-.search-bar input:focus {
+.search-wrapper input:focus {
   outline: 2px solid var(--color-primary);
   border-color: transparent;
+}
+
+.sort-buttons {
+  flex-shrink: 0;
+  display: flex;
+  background: var(--color-timeline-bg);
+  border-radius: 6px;
+  padding: 2px;
+  border: 1px solid var(--color-border);
+}
+
+.sort-btn {
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: var(--color-timeline-text);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.sort-btn:hover {
+  color: var(--color-text);
+}
+
+.sort-btn.active {
+  background: var(--color-bg);
+  color: var(--color-primary);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .city-list {

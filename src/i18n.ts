@@ -27,7 +27,10 @@ const messages = {
       noResults: 'No cities found.',
       remove: 'Remove city',
       drag: 'Drag to reorder',
-      modalTitle: 'Add City'
+      modalTitle: 'Add City',
+      sortBy: 'Sort by',
+      sortCountry: 'Country',
+      sortTimezone: 'Timezone'
     }
   },
   'zh-CN': {
@@ -53,7 +56,10 @@ const messages = {
       noResults: '未找到相关城市',
       remove: '移除城市',
       drag: '拖拽排序',
-      modalTitle: '添加城市'
+      modalTitle: '添加城市',
+      sortBy: '排序',
+      sortCountry: '国家',
+      sortTimezone: '时区'
     }
   }
 }
