@@ -90,6 +90,11 @@ const minuteDegrees = computed(() => {
   return (m + s / 60) * 6
 })
 
+const isDaylight = computed(() => {
+  const hour = localTime.value.hour()
+  return hour >= 6 && hour < 18
+})
+
 // Localized Names
 const cityName = computed(() => {
   if (props.isCurrentLocation) return t('city.localTime')
@@ -152,9 +157,12 @@ const isDragEnabled = ref(false)
         </div>
       </div>
 
-      <div class="analog-clock" :title="formattedTime">
+      <div class="analog-clock" :class="{ 'is-day': isDaylight, 'is-night': !isDaylight }" :title="formattedTime">
         <svg viewBox="0 0 100 100">
-          <!-- Clock face -->
+          <!-- Outer Accent Ring (Suggestion 3) -->
+          <circle class="clock-accent-ring" cx="50" cy="50" r="48" />
+
+          <!-- Clock face with dynamic background (Suggestion 1) -->
           <circle class="clock-face" cx="50" cy="50" r="45" />
           
           <!-- Hour markers (12, 3, 6, 9) -->
@@ -260,16 +268,41 @@ const isDragEnabled = ref(false)
 }
 
 .analog-clock {
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   flex-shrink: 0;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .clock-face {
-  fill: none;
+  fill: transparent;
   stroke: var(--color-border);
   stroke-width: 2;
+  transition: fill 0.8s ease;
+}
+
+.clock-accent-ring {
+  fill: none;
+  stroke-width: 2;
+  stroke: transparent;
+  transition: stroke 0.8s ease;
+  opacity: 0.6;
+}
+
+.is-day .clock-face {
+  fill: rgba(253, 224, 71, 0.08); /* Pale yellow tint for day */
+}
+
+.is-day .clock-accent-ring {
+  stroke: #f59e0b; /* Amber-500 accent for day */
+}
+
+.is-night .clock-face {
+  fill: rgba(30, 58, 138, 0.12); /* Deep blue tint for night */
+}
+
+.is-night .clock-accent-ring {
+  stroke: #3b82f6; /* Blue-500 accent for night */
 }
 
 .clock-marker {
