@@ -74,6 +74,22 @@ const formattedDate = computed(() => {
 })
 const gmtOffset = computed(() => localTime.value.format('Z'))
 
+// Analog clock rotations
+const hourDegrees = computed(() => {
+  const h = localTime.value.hour() % 12
+  const m = localTime.value.minute()
+  const s = localTime.value.second()
+  // Hour hand moves slightly as minutes and seconds pass
+  return (h + m / 60 + s / 3600) * 30
+})
+
+const minuteDegrees = computed(() => {
+  const m = localTime.value.minute()
+  const s = localTime.value.second()
+  // Minute hand moves slightly as seconds pass
+  return (m + s / 60) * 6
+})
+
 // Localized Names
 const cityName = computed(() => {
   if (props.isCurrentLocation) return t('city.localTime')
@@ -124,14 +140,41 @@ const isDragEnabled = ref(false)
     </div>
     
     <div class="city-info">
-      <div class="city-name-group">
-        <span class="city-name">{{ cityName }}</span>
-        <span class="city-details">{{ cityCountry }}</span>
+      <div class="info-content">
+        <div class="city-name-group">
+          <span class="city-name">{{ cityName }}</span>
+          <span class="city-details">{{ cityCountry }}</span>
+        </div>
+        <div class="city-meta">
+          <span class="time-preview">{{ formattedTime }}</span>
+          <span class="date-preview">{{ formattedDate }}</span>
+          <span class="offset-preview">UTC {{ gmtOffset }}</span>
+        </div>
       </div>
-      <div class="city-meta">
-        <span class="time-preview">{{ formattedTime }}</span>
-        <span class="date-preview">{{ formattedDate }}</span>
-        <span class="offset-preview">UTC {{ gmtOffset }}</span>
+
+      <div class="analog-clock" :title="formattedTime">
+        <svg viewBox="0 0 100 100">
+          <!-- Clock face -->
+          <circle class="clock-face" cx="50" cy="50" r="45" />
+          
+          <!-- Hour markers (12, 3, 6, 9) -->
+          <line v-for="n in 4" :key="n" class="clock-marker" x1="50" y1="10" x2="50" y2="16" :transform="`rotate(${(n-1)*90} 50 50)`" />
+          
+          <!-- Hands -->
+          <line 
+            class="clock-hand hour-hand" 
+            x1="50" y1="50" x2="50" y2="30" 
+            :style="{ transform: `rotate(${hourDegrees}deg)` }" 
+          />
+          <line 
+            class="clock-hand minute-hand" 
+            x1="50" y1="50" x2="50" y2="18" 
+            :style="{ transform: `rotate(${minuteDegrees}deg)` }" 
+          />
+          
+          <!-- Center dot -->
+          <circle class="clock-center" cx="50" cy="50" r="3" />
+        </svg>
       </div>
     </div>
     
@@ -201,10 +244,58 @@ const isDragEnabled = ref(false)
   padding: 16px;
   border-right: 1px solid var(--color-border);
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
   flex-shrink: 0;
   overflow: hidden;
+  gap: 12px;
+}
+
+.info-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.analog-clock {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.clock-face {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 2;
+}
+
+.clock-marker {
+  stroke: var(--color-border);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.clock-hand {
+  stroke-linecap: round;
+  transform-origin: center; /* Explicitly rotate around SVG center */
+  will-change: transform;
+}
+
+.hour-hand {
+  stroke: var(--color-text);
+  stroke-width: 4;
+}
+
+.minute-hand {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+.clock-center {
+  fill: var(--color-text);
 }
 
 .city-name-group {
