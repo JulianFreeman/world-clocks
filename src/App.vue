@@ -252,13 +252,13 @@ useTitle(appTitle)
           <RotateCcw :size="18" />
           <span class="btn-text">{{ t('app.now') }}</span>
         </button>
-        <button class="action-btn" @click="resetCities" :title="t('app.reset')">
-          <RotateCw :size="18" />
-          <span class="btn-text">{{ t('app.reset') }}</span>
-        </button>
         <button class="action-btn primary" @click="showAddCity = true">
           <Plus :size="18" />
           <span class="btn-text">{{ t('app.addCity') }}</span>
+        </button>
+        <button class="action-btn" @click="resetCities" :title="t('app.reset')">
+          <RotateCw :size="18" />
+          <span class="btn-text">{{ t('app.reset') }}</span>
         </button>
         <LanguageSelector />
         <ThemeToggle />
