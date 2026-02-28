@@ -165,8 +165,17 @@ const isDragEnabled = ref(false)
           <!-- Clock face with dynamic background (Suggestion 1) -->
           <circle class="clock-face" cx="50" cy="50" r="45" />
           
-          <!-- Hour markers (12, 3, 6, 9) -->
-          <line v-for="n in 4" :key="n" class="clock-marker" x1="50" y1="10" x2="50" y2="16" :transform="`rotate(${(n-1)*90} 50 50)`" />
+          <!-- Hour markers (12 total, with major/minor styling) -->
+          <line 
+            v-for="n in 12" 
+            :key="n" 
+            class="clock-marker" 
+            :class="{ 'marker-minor': (n-1) % 3 !== 0 }"
+            x1="50" y1="10" 
+            :x2="50" 
+            :y2="(n-1) % 3 === 0 ? 16 : 13" 
+            :transform="`rotate(${(n-1)*30} 50 50)`" 
+          />
           
           <!-- Hands -->
           <line 
@@ -309,6 +318,10 @@ const isDragEnabled = ref(false)
   stroke: var(--color-border);
   stroke-width: 2;
   stroke-linecap: round;
+}
+
+.clock-marker.marker-minor {
+  stroke-width: 1.2;
 }
 
 .clock-hand {
