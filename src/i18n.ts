@@ -6,7 +6,7 @@ import 'dayjs/locale/en'
 const messages = {
   en: {
     app: {
-      title: 'World Clock',
+      title: 'World Clocks',
       now: 'Now',
       addCity: 'Add City',
       backToNow: 'Back to Now',
