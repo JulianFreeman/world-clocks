@@ -275,8 +275,9 @@ function addCity(city: CityData) {
 .city-offset {
   margin-left: auto;
   margin-right: 16px;
-  font-family: monospace;
-  font-size: 0.9rem;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--color-timeline-text);
 }
 

@@ -6,7 +6,8 @@ import 'dayjs/locale/en'
 const messages = {
   en: {
     app: {
-      title: 'World Clocks',
+      title1: 'World',
+      title2: 'Clocks',
       now: 'Now',
       addCity: 'Add City',
       reset: 'Reset Cities',
@@ -39,7 +40,8 @@ const messages = {
   },
   'zh-CN': {
     app: {
-      title: '世界时钟',
+      title1: '世界',
+      title2: '时钟',
       now: '现在',
       addCity: '添加城市',
       reset: '重置城市',

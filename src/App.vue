@@ -228,7 +228,7 @@ function onDragEnd() {
   draggedItemIndex.value = null
 }
 
-const appTitle = computed(() => t('app.title'))
+const appTitle = computed(() => `${t('app.title1')} ${t('app.title2')}`)
 useTitle(appTitle)
 </script>
 
@@ -236,7 +236,16 @@ useTitle(appTitle)
   <div class="app-container" :style="{ '--sidebar-width': `${sidebarWidth}px` }">
     <header class="app-header">
       <div class="logo">
-        <h1>{{ t('app.title') }}</h1>
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          <path d="m12 12 3-3" stroke="var(--color-primary)" />
+        </svg>
+        <h1>
+          <span class="title-main">{{ t('app.title1') }}</span>
+          <span class="title-sub">{{ t('app.title2') }}</span>
+        </h1>
       </div>
       <div class="controls">
         <button class="action-btn" @click="resetToNow" :class="{ active: isLive }" :title="t('app.backToNow')">
@@ -314,20 +323,44 @@ useTitle(appTitle)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: 8px 24px;
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-bg);
   z-index: 10;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--color-text);
+  opacity: 0.9;
+}
+
 .logo h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.8rem;
+  line-height: 1.6;
   margin: 0;
-  background: linear-gradient(to right, var(--color-primary), #8b5cf6);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+  display: flex;
+  gap: 6px;
+}
+
+.title-main {
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.title-sub {
+  font-weight: 400;
+  color: var(--color-text);
+  opacity: 0.8;
 }
 
 .controls {
