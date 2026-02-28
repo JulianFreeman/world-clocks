@@ -2,13 +2,14 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useStorage, useNow, useTitle, useResizeObserver } from '@vueuse/core'
 import dayjs from 'dayjs'
-import { Plus, RotateCcw } from 'lucide-vue-next'
+import { Plus, RotateCcw, RotateCw } from 'lucide-vue-next'
 import { v4 as uuidv4 } from 'uuid'
 
 import CitySelector from './components/CitySelector.vue'
 import TimelineRow from './components/TimelineRow.vue'
 import ThemeToggle from './components/ThemeToggle.vue'
 import LanguageSelector from './components/LanguageSelector.vue'
+import ConfirmModal from './components/ConfirmModal.vue'
 import type { CityData } from './data/cities'
 import { useI18n } from 'vue-i18n'
 
@@ -47,7 +48,15 @@ interface StoredCity extends CityData {
 
 // Default cities
 const defaultCities: StoredCity[] = [
-  { id: uuidv4(), name: 'Local Time', country: 'Current Location', timezone: dayjs.tz.guess() }
+  { id: uuidv4(), name: 'Local Time', country: 'Current Location', timezone: dayjs.tz.guess() },
+  { id: uuidv4(), name: 'New York', country: 'USA', timezone: 'America/New_York', name_zh: '纽约', country_zh: '美国' },
+  { name: 'Los Angeles', country: 'USA', timezone: 'America/Los_Angeles', name_zh: '洛杉矶', country_zh: '美国', id: uuidv4() },
+  { name: 'London', country: 'UK', timezone: 'Europe/London', name_zh: '伦敦', country_zh: '英国', id: uuidv4() },
+  { name: 'Paris', country: 'France', timezone: 'Europe/Paris', name_zh: '巴黎', country_zh: '法国', id: uuidv4() },
+  { name: 'Athens', country: 'Greece', timezone: 'Europe/Athens', name_zh: '雅典', country_zh: '希腊', id: uuidv4() },
+  { name: 'Seoul', country: 'South Korea', timezone: 'Asia/Seoul', name_zh: '首尔', country_zh: '韩国', id: uuidv4() },
+  { name: 'Sydney', country: 'Australia', timezone: 'Australia/Sydney', name_zh: '悉尼', country_zh: '澳大利亚', id: uuidv4() },
+  { name: 'Beijing', country: 'China', timezone: 'Asia/Shanghai', name_zh: '北京', country_zh: '中国', id: uuidv4() }
 ]
 
 const selectedCities = useStorage<StoredCity[]>('world-clock-cities', defaultCities)
@@ -55,6 +64,7 @@ const sidebarWidth = useStorage('world-clock-sidebar-width', 400)
 
 // UI State
 const showAddCity = ref(false)
+const showResetConfirm = ref(false)
 const isDraggingTime = ref(false)
 const isResizingSidebar = ref(false)
 const lastMouseX = ref(0)
@@ -177,6 +187,19 @@ function removeCity(index: number) {
   selectedCities.value.splice(index, 1)
 }
 
+function resetCities() {
+  showResetConfirm.value = true
+}
+
+function handleResetConfirm() {
+  // Regenerate IDs to ensure uniqueness/fresh start
+  selectedCities.value = defaultCities.map(city => ({
+    ...city,
+    id: uuidv4()
+  }))
+  showResetConfirm.value = false
+}
+
 // --- Row Reordering (Drag and Drop) ---
 
 const draggedItemIndex = ref<number | null>(null)
@@ -220,6 +243,10 @@ useTitle(appTitle)
           <RotateCcw :size="18" />
           <span class="btn-text">{{ t('app.now') }}</span>
         </button>
+        <button class="action-btn" @click="resetCities" :title="t('app.reset')">
+          <RotateCw :size="18" />
+          <span class="btn-text">{{ t('app.reset') }}</span>
+        </button>
         <button class="action-btn primary" @click="showAddCity = true">
           <Plus :size="18" />
           <span class="btn-text">{{ t('app.addCity') }}</span>
@@ -261,6 +288,14 @@ useTitle(appTitle)
     </main>
 
     <CitySelector v-if="showAddCity" @close="showAddCity = false" @add="handleAddCity" />
+    
+    <ConfirmModal 
+      v-if="showResetConfirm"
+      :title="t('app.reset')"
+      :message="t('app.resetConfirm')"
+      @confirm="handleResetConfirm"
+      @cancel="showResetConfirm = false"
+    />
   </div>
 </template>
 

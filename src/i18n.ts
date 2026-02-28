@@ -9,6 +9,10 @@ const messages = {
       title: 'World Clocks',
       now: 'Now',
       addCity: 'Add City',
+      reset: 'Reset Cities',
+      resetConfirm: 'Are you sure you want to reset the city list to default?',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
       backToNow: 'Back to Now',
       theme: {
         title: 'Select Theme',
@@ -38,6 +42,10 @@ const messages = {
       title: '世界时钟',
       now: '现在',
       addCity: '添加城市',
+      reset: '重置城市',
+      resetConfirm: '确定要将城市列表恢复为默认吗？',
+      cancel: '取消',
+      confirm: '确认',
       backToNow: '回到现在',
       theme: {
         title: '选择主题',
